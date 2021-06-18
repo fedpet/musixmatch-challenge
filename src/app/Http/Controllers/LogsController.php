@@ -3,25 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LogRequest;
-use App\Models\Device;
 use App\Models\Log;
 use App\Models\Segment;
-use App\Models\Station;
 use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class LogsController extends BaseController
 {
     use ValidatesRequests;
 
+    const DEFAULT_PRICE = 10;
+
     /**
      * @throws Throwable
      */
     public function saveEntrance(LogRequest $request) {
         [$device, $station, $date] = $request->validatedData();
-        // TODO: handle case when user has never left a station, but is entering a new one
+
+        $log = $device->currentLog();
+        if($log != null){
+            return response(null, 409);
+        }
 
         $log = new Log([
             'dateOfEntrance' => $date
@@ -31,25 +35,26 @@ class LogsController extends BaseController
         $log->saveOrFail();
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function saveExit(LogRequest $request) {
-        [$device, $station, $date] = $request->validatedData();
+        [$device, $toStation, $dateOfExit] = $request->validatedData();
 
-        // TODO: assert dateOfExit > dateOfEntrance
+        $log = $device->currentLog();
+        if($log == null){
+            return response(null, 409);
+        }
+        if($log->dateOfEntrance->greaterThan($dateOfExit)) {
+            return response(null, 400);
+        }
 
-        $log = $device->logs()
-            ->orderByDesc('dateOfEntrance')
-            ->whereNull('dateOfExit')
-            ->firstOrFail();
+        $segment = Segment::between($log->fromStation, $toStation);
+        $cost = $segment == null ? self::DEFAULT_PRICE : $segment->cost;
 
-        $fromStation = $log->fromStation;
-        $toStation = $station;
-        $segment = Segment::between($fromStation, $toStation);
-        // TODO: default price constant
-        $cost = $segment == null ? 10 : $segment->cost;
-
-        $log->dateOfExit = $date;
+        $log->dateOfExit = $dateOfExit;
         $log->cost = $cost;
-        $log->toStation()->associate($station);
+        $log->toStation()->associate($toStation);
         $log->saveOrFail();
     }
 }

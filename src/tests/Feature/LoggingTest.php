@@ -13,11 +13,7 @@ use Tests\TestCase;
 class LoggingTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
+
     public function testLoggingEntrance()
     {
         $device = Device::factory()->for(User::factory())->create();
@@ -58,5 +54,48 @@ class LoggingTest extends TestCase
         $this->assertEquals(new Carbon('2021-01-14 09:00'), $log->dateOfExit);
         $this->assertEquals($toStation->id, $log->toStation->id);
         $this->assertEquals(10, $log->cost);
+    }
+
+    public function testCannotExitTwiceInARow()
+    {
+        $device = Device::factory()->for(User::factory())->create();
+        $fromStation = Station::factory()->create();
+        $toStation = Station::factory()->create();
+        Log::factory()->for($device)->createOne([
+            'station_id_entrance' => $fromStation->id,
+            'dateOfEntrance' => '2021-01-14 08:00'
+        ]);
+        $response = $this->post('/api/logs/exit', [
+            'device' => $device->id,
+            'date' => '2021-01-14 09:00',
+            'station' => $toStation->id
+        ]);
+        $response->assertStatus(200);
+        $toStation = Station::factory()->create();
+        $response = $this->post('/api/logs/exit', [
+            'device' => $device->id,
+            'date' => '2021-01-14 10:00',
+            'station' => $toStation->id
+        ]);
+        $response->assertStatus(409);
+    }
+
+    public function testCannotEnterTwiceInARow()
+    {
+        $device = Device::factory()->for(User::factory())->create();
+        $station = Station::factory()->create();
+        $response = $this->post('/api/logs/entrance', [
+            'device' => $device->id,
+            'date' => '2021-01-14 08:58:32',
+            'station' => $station->id
+        ]);
+        $response->assertStatus(200);
+        $station = Station::factory()->create();
+        $response = $this->post('/api/logs/entrance', [
+            'device' => $device->id,
+            'date' => '2021-01-14 08:58:32',
+            'station' => $station->id
+        ]);
+        $response->assertStatus(409);
     }
 }

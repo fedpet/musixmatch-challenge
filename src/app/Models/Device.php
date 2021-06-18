@@ -31,4 +31,8 @@ class Device extends Model
     {
         return $this->hasMany(Log::class);
     }
+
+    public function currentLog() {
+        return $this->logs()->whereNull('dateOfExit')->first();
+    }
 }
