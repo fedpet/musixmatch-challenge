@@ -2,25 +2,37 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Log extends Model
 {
+    use HasFactory;
+
     public bool $timestamps = false;
 
-    public function device(): HasOne
+    protected array $fillable = [
+        'dateOfEntrance',
+    ];
+
+    protected $casts = [
+        'dateOfEntrance' => 'datetime',
+        'dateOfExit' => 'datetime'
+    ];
+
+    public function device(): BelongsTo
     {
-        return $this->hasOne(Device::class);
+        return $this->belongsTo(Device::class);
     }
 
-    public function fromStation(): HasOne
+    public function fromStation(): BelongsTo
     {
-        return $this->hasOne(Station::class, 'station_id_enter');
+        return $this->belongsTo(Station::class, 'station_id_entrance');
     }
 
-    public function toStation(): HasOne
+    public function toStation(): BelongsTo
     {
-        return $this->hasOne(Station::class, 'station_id_exit');
+        return $this->belongsTo(Station::class, 'station_id_exit');
     }
 }

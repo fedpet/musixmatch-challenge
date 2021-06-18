@@ -40,12 +40,12 @@ class Init extends Migration
         Schema::create('logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('device_id')->constrained()->cascadeOnDelete();
-            $table->dateTime('date_enter');
-            $table->dateTime('date_exit')->nullable()->default(null);
+            $table->dateTime('dateOfEntrance');
+            $table->dateTime('dateOfExit')->nullable()->default(null);
             $table->unsignedDecimal('cost', 8, 2)->nullable()->default(null);
-            $table->unsignedBigInteger('station_id_enter');
+            $table->unsignedBigInteger('station_id_entrance');
+            $table->foreign('station_id_entrance')->references('id')->on('stations')->cascadeOnDelete();
             $table->unsignedBigInteger('station_id_exit')->nullable()->default(null);
-            $table->foreign('station_id_enter')->references('id')->on('stations')->cascadeOnDelete();
             $table->foreign('station_id_exit')->references('id')->on('stations')->cascadeOnDelete();
         });
     }
