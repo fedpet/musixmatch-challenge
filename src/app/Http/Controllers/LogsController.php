@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LogRequest;
 use App\Models\Device;
 use App\Models\Log;
 use App\Models\Segment;
@@ -18,14 +19,8 @@ class LogsController extends BaseController
     /**
      * @throws Throwable
      */
-    public function saveEntrance(Request $request) {
-        $deviceId = $request->input('device');
-        $date = $request->input('date');
-        $stationId = $request->input('station');
-
-        $device = Device::findOrFail($deviceId);
-        $station = Station::findOrFail($stationId);
-
+    public function saveEntrance(LogRequest $request) {
+        [$device, $station, $date] = $request->validatedData();
         // TODO: handle case when user has never left a station, but is entering a new one
 
         $log = new Log([
@@ -36,13 +31,8 @@ class LogsController extends BaseController
         $log->saveOrFail();
     }
 
-    public function saveExit(Request $request) {
-        $deviceId = $request->input('device');
-        $date = $request->input('date');
-        $stationId = $request->input('station');
-
-        $device = Device::findOrFail($deviceId);
-        $station = Station::findOrFail($stationId);
+    public function saveExit(LogRequest $request) {
+        [$device, $station, $date] = $request->validatedData();
 
         // TODO: assert dateOfExit > dateOfEntrance
 
