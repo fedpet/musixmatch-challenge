@@ -17,6 +17,7 @@ class CostCalculationTest extends TestCase
 
     public function testMonthlyCostForSingleUser()
     {
+        $calculator = new CostCalculationService();
         $NUM_LOGS = 10;
         $COST_PER_LOG = 10;
 
@@ -39,13 +40,14 @@ class CostCalculationTest extends TestCase
             'cost' => 9999
         ]);
 
-        $cost = CostCalculationService::monthlyCostForUser($user, $date);
+        $cost = $calculator->monthlyCostForUser($user, $date);
 
         $this->assertEqualsWithDelta($NUM_LOGS * $COST_PER_LOG, $cost, 0.001);
     }
 
     public function testMonthlyCostForAllUsers()
     {
+        $calculator = new CostCalculationService();
         $NUM_LOGS = 10;
         $COST_PER_LOG = 10;
 
@@ -64,7 +66,7 @@ class CostCalculationTest extends TestCase
             ]);
         });
 
-        $cost = CostCalculationService::monthlyCostForAll($date);
+        $cost = $calculator->monthlyCostForAll($date);
 
         $cost->each(function($user) use($NUM_LOGS, $COST_PER_LOG) {
             $this->assertEqualsWithDelta($NUM_LOGS * $COST_PER_LOG * $user->id, $user->cost, 0.001);

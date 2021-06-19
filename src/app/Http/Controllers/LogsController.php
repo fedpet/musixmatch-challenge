@@ -2,59 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\IllegalStateException;
 use App\Http\Requests\LogRequest;
-use App\Models\Log;
-use App\Models\Segment;
-use Illuminate\Foundation\Validation\ValidatesRequests;
+use App\Services\LoggingService;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class LogsController extends BaseController
 {
-    use ValidatesRequests;
+    private LoggingService $loggingService;
 
-    const DEFAULT_PRICE = 10;
+    public function __construct(LoggingService $loggingService)
+    {
+        $this->loggingService = $loggingService;
+    }
 
     /**
      * @throws Throwable
      */
     public function saveEntrance(LogRequest $request) {
         [$device, $station, $date] = $request->validatedData();
-
-        $log = $device->currentLog();
-        if($log != null){
-            return response(null, 409);
-        }
-
-        $log = new Log([
-            'dateOfEntrance' => $date
-        ]);
-        $log->device()->associate($device);
-        $log->fromStation()->associate($station);
-        $log->saveOrFail();
+        $this->loggingService->saveEntrance($device, $station, $date);
     }
 
     /**
-     * @throws ValidationException
+     * @throws IllegalStateException
+     * @throws Throwable
      */
     public function saveExit(LogRequest $request) {
-        [$device, $toStation, $dateOfExit] = $request->validatedData();
-
-        $log = $device->currentLog();
-        if($log == null){
-            return response(null, 409);
-        }
-        if($log->dateOfEntrance->greaterThan($dateOfExit)) {
-            return response(null, 400);
-        }
-
-        $segment = Segment::between($log->fromStation, $toStation);
-        $cost = $segment == null ? self::DEFAULT_PRICE : $segment->cost;
-
-        $log->dateOfExit = $dateOfExit;
-        $log->cost = $cost;
-        $log->toStation()->associate($toStation);
-        $log->saveOrFail();
+        [$device, $station, $date] = $request->validatedData();
+        $this->loggingService->saveExit($device, $station, $date);
     }
 }

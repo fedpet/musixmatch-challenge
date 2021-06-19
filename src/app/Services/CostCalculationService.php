@@ -8,13 +8,13 @@ use Carbon\Carbon;
 
 class CostCalculationService
 {
-    public static function monthlyCostForUser(User $user, Carbon $date) {
+    public function monthlyCostForUser(User $user, Carbon $date) {
         return $user->logs()
             ->whereBetween('dateOfExit', [$date->copy()->startOfMonth(), $date->copy()->endOfMonth()])
             ->sum('cost');
     }
 
-    public static function monthlyCostForAll(Carbon $date) {
+    public function monthlyCostForAll(Carbon $date) {
         return User::query()
                 ->join('devices', 'devices.user_id', '=', 'users.id')
                 ->join('logs', 'logs.device_id', '=', 'devices.id')
