@@ -1,0 +1,7 @@
+.editorconfig
+.gitignore
+.gitattributes
+.phpunit.result.cache
+.env
+README.md
+vendor
