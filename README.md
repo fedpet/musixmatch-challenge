@@ -25,3 +25,6 @@ Request format (valid for both endpoints):
   "date": "YYYY-MM-DD HH:mm:ss",
 }
 ```
+
+# Cost caculation
+The code is in ![CostCalculationService](src/app/Services/CostCalculationService.php)
