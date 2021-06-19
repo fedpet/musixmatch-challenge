@@ -16,14 +16,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-Route::get('/segments', function (Request $request) {
-    return Segment::all();
-});
-
-
 Route::post('/logs/entrance', [LogsController::class, 'saveEntrance']);
 Route::post('/logs/exit', [LogsController::class, 'saveExit']);
