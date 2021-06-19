@@ -10,7 +10,7 @@ class Segment extends Model
 {
     use HasFactory;
 
-    public bool $timestamps = false;
+    public $timestamps = false;
 
     public function stationA(): HasOne
     {

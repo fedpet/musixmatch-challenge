@@ -10,9 +10,9 @@ class Log extends Model
 {
     use HasFactory;
 
-    public bool $timestamps = false;
+    public $timestamps = false;
 
-    protected array $fillable = [
+    protected $fillable = [
         'dateOfEntrance',
     ];
 

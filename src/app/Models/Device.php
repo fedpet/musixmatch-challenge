@@ -16,11 +16,11 @@ class Device extends Model
      *
      * @var array
      */
-    protected array $fillable = [
+    protected $fillable = [
         'id',
         'name',
     ];
-    public bool $timestamps = false;
+    public $timestamps = false;
 
     public function user(): BelongsTo
     {
